@@ -1,8 +1,5 @@
 import streamlit as st
-import pandas as pd
 from datetime import datetime
-import arabic_reshaper
-from bidi.algorithm import get_display
 import json
 
 # Set page configuration
@@ -35,7 +32,7 @@ st.markdown("""
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     .stTextInput>div>div>input {
-        max-width: 250px;
+        max-width: 150px !important;
     }
     h1 {
         font-size: 1.5rem !important;
@@ -80,10 +77,8 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Center the title using columns
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.title("سجل حضور مجموعة القرآن")
+# Center the title
+st.title("سجل حضور مجموعة القرآن")
 
 # Load data from JSON file
 def load_data():
@@ -104,15 +99,12 @@ selected_date = datetime.strptime(data['selected_date'], '%Y-%m-%d') if data['se
 st.session_state.students = data['students']  # Initialize session state with loaded students
 
 # Section 1: Date Selection
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.markdown('<div class="section-header">التاريخ</div>', unsafe_allow_html=True)
-with col2:
-    selected_date = st.date_input(
-        "",
-        value=selected_date,
-        format="DD/MM/YYYY"
-    )
+st.markdown('<div class="section-header">التاريخ</div>', unsafe_allow_html=True)
+selected_date = st.date_input(
+    "",
+    value=selected_date,
+    format="DD/MM/YYYY"
+)
 
 # Update the JSON file with the selected date
 data['selected_date'] = selected_date.strftime('%Y-%m-%d')
@@ -122,19 +114,16 @@ save_data(data)
 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
 # Section 2: Add New Student
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.markdown('<div class="section-header">إضافة طالب</div>', unsafe_allow_html=True)
-with col2:
-    st.markdown('<div class="student-container">', unsafe_allow_html=True)
-    new_student = st.text_input("", key="new_student")
-    if st.button("➕", key="add_button"):
-        if new_student:
-            st.session_state.students.append(new_student)
-            data['students'] = st.session_state.students
-            save_data(data)  # Save the updated data to the JSON file
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">إضافة طالب</div>', unsafe_allow_html=True)
+st.markdown('<div class="student-container">', unsafe_allow_html=True)
+new_student = st.text_input("", key="new_student")
+if st.button("➕", key="add_button"):
+    if new_student:
+        st.session_state.students.append(new_student)
+        data['students'] = st.session_state.students
+        save_data(data)  # Save the updated data to the JSON file
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Add divider
 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
@@ -146,23 +135,20 @@ def remove_student(index):
     save_data(data)
 
 # Section 3: Students List
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.markdown('<div class="section-header">قائمة الطلاب</div>', unsafe_allow_html=True)
-with col2:
-    if st.session_state.students:
-        st.info(f"يوجد {len(st.session_state.students)} طلاب مسجلين")
+st.markdown('<div class="section-header">قائمة الطلاب</div>', unsafe_allow_html=True)
+if st.session_state.students:
+    st.info(f"يوجد {len(st.session_state.students)} طلاب مسجلين")
 
-        for i, student in enumerate(st.session_state.students):
-            st.markdown('<div class="student-container">', unsafe_allow_html=True)
-            st.session_state.students[i] = st.text_input(
-                "",
-                value=student,
-                key=f"student_{i}"
-            )
-            if st.button("➖", key=f"delete_{i}"):
-                remove_student(i)
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.info("لا يوجد طلاب مسجلين")
+    for i, student in enumerate(st.session_state.students):
+        st.markdown('<div class="student-container">', unsafe_allow_html=True)
+        st.session_state.students[i] = st.text_input(
+            "",
+            value=student,
+            key=f"student_{i}"
+        )
+        if st.button("➖", key=f"delete_{i}"):
+            remove_student(i)
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+else:
+    st.info("لا يوجد طلاب مسجلين")
